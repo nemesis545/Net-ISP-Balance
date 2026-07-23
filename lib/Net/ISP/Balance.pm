@@ -1237,6 +1237,7 @@ RedHat/CentOS network configuration files in
 
 sub install_etc {
     my $self = shift;
+    return '/etc/net-isp-balance'            if -e '/etc/gentoo-release' || -d '/etc/net-isp-balance';
     return '/etc/network'                    if -d '/etc/network';
     return '/etc/sysconfig/network-scripts'  if -d '/etc/sysconfig/network-scripts';
     return '/etc';

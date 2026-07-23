@@ -8,8 +8,8 @@ VERSION	?= $(lastword $(shell grep ^Version: foolsm.spec))
 PROGS	= foolsm
 PKG     = foolsm
 
-CC	= gcc
-override CFLAGS	+= -w -O2 -DFOOLSM_VERSION=\"$(VERSION)\"
+CC	?= gcc
+CFLAGS	+= -w -O2 -DFOOLSM_VERSION=\"$(VERSION)\"
 #override CFLAGS += -D NO_PLUGIN_EXPORT
 #override CFLAGS += -D NO_PLUGIN_EXPORT_MUNIN
 #override CFLAGS += -D NO_PLUGIN_EXPORT_STATUS

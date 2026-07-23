@@ -1,0 +1,36 @@
+#!/sbin/openrc-run
+# Copyright 1999-2023 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+name="Net-ISP-Balance"
+description="Load balancing and link monitoring for multiple ISPs"
+
+command="/usr/bin/load_balance.pl"
+# load_balance.pl doesn't daemonize itself but spawns lsm which does.
+# We manage the lifecycle via the load_balance.pl hooks.
+
+depend() {
+	need net
+	after firewall
+}
+
+start() {
+    ebegin "Starting Net-ISP-Balance"
+    # load_balance.pl sets up firewall/routes and starts lsm (foolsm)
+    ${command}
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping Net-ISP-Balance"
+    # load_balance.pl -k kills the background lsm daemon
+    ${command} -k
+    eend $?
+}
+
+reload() {
+    ebegin "Reloading Net-ISP-Balance"
+    # Calling it again flushes/recreates routes and reloads lsm
+    ${command}
+    eend $?
+}

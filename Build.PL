@@ -26,18 +26,23 @@ sub ACTION_install {
     my $self = shift;
     my $dir  = $self->base_dir();
     $self->SUPER::ACTION_install();
-    mkdir '/var/lib/lsm';
+    
+    my $destdir = $self->destdir || $ENV{DESTDIR} || '';
+    
+    mkdir "$destdir/var/lib/lsm";
     my $path = $self->install_destination('script');
     my $install_etc = Net::ISP::Balance->install_etc;
-    unlink("$install_etc/load_balance.pl");
-    symlink("$path/load_balance.pl"=>"$install_etc/load_balance.pl");
-    # fix permissions of balance.conf, to encourage root to edit
-    chmod 0644,"$install_etc/balance.conf";
-    # and rules files
-    system "chmod u+w $install_etc/balance/firewall/*";
-    system "chmod u+w $install_etc/balance/routes/*";
-    system "chmod u+w $install_etc/balance/pre-run/*";
-    system "chmod u+w $install_etc/balance/post-run/*";
+    
+    system "mkdir -p $destdir$install_etc";
+    system "cp etc/balance.conf $destdir$install_etc/";
+    system "cp -a etc/balance $destdir$install_etc/";
+    
+    chmod 0755, glob("$destdir$install_etc/balance/firewall/*");
+    chmod 0755, glob("$destdir$install_etc/balance/routes/*");
+    chmod 0755, glob("$destdir$install_etc/balance/pre-run/*");
+    chmod 0755, glob("$destdir$install_etc/balance/post-run/*");
+
+    system "ln -sf $path/load_balance.pl $destdir/etc/load_balance.pl" unless $destdir;
 }
 
 sub process_lsm_files {

@@ -1,0 +1,41 @@
+# Net-ISP-Balance on Gentoo Linux
+
+Net-ISP-Balance has been adapted to run natively on Gentoo Linux, respecting Portage sandboxing and OpenRC service management.
+
+## Configuration
+The default configuration directory for Gentoo is `/etc/net-isp-balance`.
+You should define your ISP interfaces in `/etc/net-isp-balance/balance.conf`.
+
+## Service Management (OpenRC)
+An OpenRC service script is provided. To start the load balancer and link status monitor daemon:
+```bash
+rc-service net-isp-balance start
+```
+
+To enable it at boot:
+```bash
+rc-update add net-isp-balance default
+```
+
+## Network Lifecycle Hooks (netifrc)
+For maximum reliability, you should trigger routing updates when your network interfaces physical states change. Instead of Debian's `/etc/network/if-up.d/`, Gentoo uses `/etc/conf.d/net` hooks.
+
+You can add the following to your `/etc/conf.d/net` to automatically notify the load balancer:
+
+```bash
+postup() {
+    # Notify Net-ISP-Balance that an interface came up
+    if rc-service net-isp-balance status | grep -q "started"; then
+        /usr/bin/load_balance.pl
+    fi
+    return 0
+}
+
+postdown() {
+    # Notify Net-ISP-Balance that an interface went down
+    if rc-service net-isp-balance status | grep -q "started"; then
+        /usr/bin/load_balance.pl
+    fi
+    return 0
+}
+```
